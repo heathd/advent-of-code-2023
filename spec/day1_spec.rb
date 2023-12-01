@@ -11,6 +11,15 @@ RSpec.describe "day1" do
 		it "if theres only one digit it uses it as both first and last" do
 			expect(day1.find_first_and_last_digits_of_line("frog5dof")).to eq([5,5])
 		end
+
+		context "with numbers as words" do
+			it "finds the numbers as words" do
+				expect(day1.find_first_and_last_digits_of_line("one")).to eq([1,1])
+				expect(day1.find_first_and_last_digits_of_line("one2three")).to eq([1,3])
+				expect(day1.find_first_and_last_digits_of_line("abcone2three")).to eq([1,3])
+				expect(day1.find_first_and_last_digits_of_line("onceuponatimetherewerethreelonelywolves")).to eq([3,1])
+			end
+		end
 	end
 
 	describe "#line_calibration_value" do
@@ -27,23 +36,43 @@ RSpec.describe "day1" do
 	end
 
 	describe "#calibration_value" do
+		context "numbers as digits" do
+			let(:sample_input) {
+				<<~SAMPLE
+					1abc2
+					pqr3stu8vwx
+					a1b2c3d4e5f
+					treb7uchet
+				SAMPLE
+			}
 
-		let(:sample_input) {
-			<<~SAMPLE
-				1abc2
-				pqr3stu8vwx
-				a1b2c3d4e5f
-				treb7uchet
-			SAMPLE
-		}
+			it "for a single line" do
+				expect(day1.calibration_value("1")).to eq(11)
+			end
 
-
-		it "for a single line" do
-			expect(day1.calibration_value("1")).to eq(11)
+			it "sums the calibration values of multiple lines" do
+				expect(day1.calibration_value(sample_input)).to eq(142)
+			end
 		end
 
-		it "sums the calibration values of multiple lines" do
-			expect(day1.calibration_value(sample_input)).to eq(142)
+		context "numbers as words" do
+			let(:sample_input) {
+				<<~SAMPLE
+					two1nine
+					eightwothree
+					abcone2threexyz
+					xtwone3four
+					4nineeightseven2
+					zoneight234
+					7pqrstsixteen
+				SAMPLE
+			}
+
+			it "sums the calibration values of multiple lines" do
+				expect(day1.calibration_value(sample_input)).to eq(281)
+			end
 		end
 	end
+
+
 end

@@ -1,7 +1,31 @@
+require "strscan"
+
 class Day1
+	DIGITS = %w{
+		zero
+		one
+		two
+		three
+		four
+		five
+		six
+		seven
+		eight
+		nine
+	}
+
 	def find_first_and_last_digits_of_line(line)
-		nums = line.chars.select {|c| c =~ /^[0-9]$/}.map(&:to_i)
-		[nums.first, nums.last]
+		digits = []
+		s = StringScanner.new(line)
+		while s.scan_until(/([0-9]|zero|one|two|three|four|five|six|seven|eight|nine)/)
+			digit = s.matched
+			if digit =~ /[0-9]/
+				digits << digit.to_i
+			else
+				digits << DIGITS.find_index(digit)
+			end
+		end
+		[digits.first, digits.last]
 	end
 
 	def line_calibration_value(line)
