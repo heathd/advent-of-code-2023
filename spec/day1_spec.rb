@@ -14,10 +14,20 @@ RSpec.describe "day1" do
 
 		context "with numbers as words" do
 			it "finds the numbers as words" do
-				expect(day1.find_first_and_last_digits_of_line("one")).to eq([1,1])
+				expect(day1.find_first_and_last_digits_of_line("zero")).to  eq([0,0])
+				expect(day1.find_first_and_last_digits_of_line("one")).to   eq([1,1])
+				expect(day1.find_first_and_last_digits_of_line("two")).to   eq([2,2])
+				expect(day1.find_first_and_last_digits_of_line("three")).to eq([3,3])
+				expect(day1.find_first_and_last_digits_of_line("four")).to  eq([4,4])
+				expect(day1.find_first_and_last_digits_of_line("five")).to  eq([5,5])
+				expect(day1.find_first_and_last_digits_of_line("six")).to   eq([6,6])
+				expect(day1.find_first_and_last_digits_of_line("seven")).to eq([7,7])
+				expect(day1.find_first_and_last_digits_of_line("eight")).to eq([8,8])
+				expect(day1.find_first_and_last_digits_of_line("nine")).to  eq([9,9])
 				expect(day1.find_first_and_last_digits_of_line("one2three")).to eq([1,3])
 				expect(day1.find_first_and_last_digits_of_line("abcone2three")).to eq([1,3])
 				expect(day1.find_first_and_last_digits_of_line("onceuponatimetherewerethreelonelywolves")).to eq([3,1])
+				expect(day1.find_first_and_last_digits_of_line("7pqrstsixteen")).to eq([7,6])
 			end
 		end
 	end
