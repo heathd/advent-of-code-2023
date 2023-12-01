@@ -43,6 +43,12 @@ RSpec.describe "day1" do
 		it "concatenates first and last digit" do
 			expect(day1.line_calibration_value("pqr3stu8vwx")).to eq(38)
 		end
+
+		context "a line where a number prefixes another number" do
+			it "works" do
+				expect(day1.line_calibration_value("fivephplggzkmfivetjfourmvcpnjxfvg58eightwoc")).to eq(52)
+			end
+		end
 	end
 
 	describe "#calibration_value" do

@@ -24,6 +24,9 @@ class Day1
 			else
 				digits << DIGITS.find_index(digit)
 			end
+
+			# Move the pointer back to one character after the start of the match
+			s.pos = s.pos - (digit.size - 1)
 		end
 		[digits.first, digits.last]
 	end
