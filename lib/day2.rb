@@ -67,3 +67,13 @@ class Day2
 	end
 
 end
+
+if __FILE__==$0
+	assumed_bag_contents = {
+		"red" => 12,
+		"green" => 13,
+		"blue" => 14 
+	}
+
+	puts Day2.new.sum_game_ids_of_possible_games(ARGF.read, assumed_bag_contents)
+end
