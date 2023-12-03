@@ -9,6 +9,7 @@ RSpec.describe Round do
 		expect(round.possible?("blue" => 4, "red" => 4)).to eq(true)
 		expect(round.possible?("green" => 1)).to eq(false)
 	end
+
 end
 
 RSpec.describe Game do
@@ -32,6 +33,19 @@ RSpec.describe Game do
 		expect(game.is_this_game_possible?("blue" => 6, "red" => 4, "green" => 1)).to eq(false)
 		expect(game.is_this_game_possible?("blue" => 6, "red" => 4, "green" => 2, "yellow" => 1)).to eq(true)
 	end
+
+	it "can list the fewest cubes possible" do
+		expect(game.fewest_cubes_possible).to eq({
+			"blue" => 6,
+			"red" => 4,
+			"green" => 2
+		})
+	end
+
+	it "can calulate the power of the minimal set of cubes" do
+		expect(game.power_of_minset).to eq(48)
+	end
+
 end
 
 RSpec.describe Day2 do
@@ -89,5 +103,8 @@ RSpec.describe Day2 do
 			expect(sum_of_ids).to eq(8)
 		end
 
+		it "can calulate the sum of minset power of all the games" do
+			expect(day2.power_of_minsets(list_of_games)).to eq(2286)
+		end
 	end
 end
