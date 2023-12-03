@@ -88,6 +88,26 @@ class EngineSchematicParser
 	def sum_of_part_numbers
 		part_numbers.inject(&:+)
 	end
+
+	def gears
+		symbols.select {|s| s.char == "*"}.select do |s|
+			numbers.select {|n| n.touches?(s)}.size == 2
+		end
+	end
+
+	def gear_ratio_of_gears
+		stars_with_adjacent_numbers = symbols.select {|s| s.char == "*"}.map do |s|
+			numbers.select {|n| n.touches?(s)}
+		end
+
+		stars_with_adjacent_numbers
+			.select {|num_list| num_list.size == 2}
+			.map {|num_list| num_list[0].number * num_list[1].number }
+	end
+
+	def sum_of_gear_ratio
+		gear_ratio_of_gears.inject(&:+)
+	end
 end
 
 if __FILE__==$0

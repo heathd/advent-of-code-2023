@@ -177,5 +177,32 @@ RSpec.describe EngineSchematicParser do
 		it "finds the sum of part numbers" do
 			expect(engine_schematic_parser.sum_of_part_numbers).to eq(4361)
 		end
+
+		# The missing part wasn't the only issue - one of the gears in the engine is
+		# wrong. A gear is any * symbol that is adjacent to exactly two part
+		# numbers. Its gear ratio is the result of multiplying those two numbers
+		# together.
+
+		it "finds the gears" do
+			gears = engine_schematic_parser.gears
+
+			expect(gears.size).to eq(2)
+			expect(gears[0].xpos).to eq(3)
+			expect(gears[0].ypos).to eq(1)
+
+			expect(gears[1].xpos).to eq(5)
+			expect(gears[1].ypos).to eq(8)
+		end
+
+		it "finds the gear ratio" do
+			gear_ratio_of_gears = engine_schematic_parser.gear_ratio_of_gears
+
+			expect(gear_ratio_of_gears).to eq([467*35, 755*598])
+		end
+
+		it "finds the sum of gear ratios ratio" do
+			expect(engine_schematic_parser.sum_of_gear_ratio).to eq(467835)
+		end
+
 	end
 end
