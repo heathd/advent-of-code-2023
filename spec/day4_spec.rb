@@ -16,9 +16,9 @@ class ScratchCard
 	end
 
 	def winning_numbers_you_have
-		[]
+		winning_numbers.select {|n| numbers_you_have.include?(n)}
 	end
-	
+
 private
 	def as_numbers(text_list)
 		text_list.split(" ").reject(&:empty?).map(&:to_i)
@@ -59,6 +59,10 @@ RSpec.describe ScratchCard do
 
 		it "can list the numbers you have" do
 			expect(scratchcard.numbers_you_have).to eq([83,86,6,31,17,9,48,53])
+		end
+
+		it "can list the winning numbers you have" do
+			expect(scratchcard.winning_numbers_you_have).to contain_exactly(48,83,86,17)
 		end
 	end
 
