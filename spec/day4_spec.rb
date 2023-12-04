@@ -15,6 +15,10 @@ class ScratchCard
 		as_numbers(@numbers_you_have_text)
 	end
 
+	def winning_numbers_you_have
+		[]
+	end
+	
 private
 	def as_numbers(text_list)
 		text_list.split(" ").reject(&:empty?).map(&:to_i)
@@ -39,6 +43,10 @@ RSpec.describe ScratchCard do
 
 		it "can list the numbers you have" do
 			expect(scratchcard.numbers_you_have).to eq([2])
+		end
+
+		it "can list the winning numbers you have" do
+			expect(scratchcard.winning_numbers_you_have).to eq([])
 		end
 	end
 
