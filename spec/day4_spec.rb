@@ -20,7 +20,15 @@ class ScratchCard
 	end
 
 	def score
-		0
+		self.class.score_for(winning_numbers: winning_numbers_you_have.size)
+	end
+
+	def self.score_for(winning_numbers: )
+		if winning_numbers == 0
+			0
+		else
+			2 ** (winning_numbers - 1)
+		end
 	end
 
 private
@@ -38,7 +46,7 @@ end
 RSpec.describe ScratchCard do
 	subject(:scratchcard) { described_class.new(card) }
 
-	context "card with only one winning number" do
+	context "card with one winning number, none that you have" do
 		let(:card) { "Card 1: 1 | 2" }
 		
 		it "can list the winning numbers" do
@@ -53,7 +61,7 @@ RSpec.describe ScratchCard do
 			expect(scratchcard.winning_numbers_you_have).to eq([])
 		end
 
-		it "can calculate score" do
+		it "scores zero" do
 			expect(scratchcard.score).to eq(0)
 		end
 	end
@@ -72,7 +80,20 @@ RSpec.describe ScratchCard do
 		it "can list the winning numbers you have" do
 			expect(scratchcard.winning_numbers_you_have).to contain_exactly(48,83,86,17)
 		end
+
+		it "can calculate score" do
+			expect(scratchcard.score).to eq(8)
+		end
 	end
 
-
+	describe ".score_for" do
+		it "scores 0 for no winning numbers, 1 for one winning number, doubles after that" do
+			expect(ScratchCard.score_for(winning_numbers: 0)).to eq(0)
+			expect(ScratchCard.score_for(winning_numbers: 1)).to eq(1)
+			expect(ScratchCard.score_for(winning_numbers: 2)).to eq(2)
+			expect(ScratchCard.score_for(winning_numbers: 3)).to eq(4)
+			expect(ScratchCard.score_for(winning_numbers: 4)).to eq(8)
+			expect(ScratchCard.score_for(winning_numbers: 5)).to eq(16)
+		end
+	end
 end
