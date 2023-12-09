@@ -48,6 +48,24 @@ class ScratchCardScorer
 	def score
 		@cards.map(&:score).inject(&:+)
 	end
+
+	def number_of_winning_scratchcards
+
+		copies_by_card = {}
+		@cards.each.with_index do |card, i|
+			copies_by_card[i] = 1
+		end
+
+		@cards.each.with_index do |card, i|
+			num_copies = copies_by_card[i]
+			number_of_subsequent_cards_to_copy = card.winning_numbers_you_have.size
+			(i+1...(i+1+number_of_subsequent_cards_to_copy)).each do |index_to_copy|
+				copies_by_card[index_to_copy] += num_copies unless index_to_copy >= @cards.size
+			end
+		end
+
+		copies_by_card.values.inject(&:+)
+	end
 end
 
 if __FILE__==$0
