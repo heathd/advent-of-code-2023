@@ -1,4 +1,5 @@
 require 'strscan'
+require 'tty-progressbar'
 
 class Mapper
 	attr_reader :map_data, :map_builder
@@ -61,9 +62,14 @@ class Mapper
 	end
 
 	def mappings_for_seeds_as_ranges
+		total = seeds_as_ranges.map {|r| r.size}.inject(&:+)
+
+		bar = TTY::ProgressBar.new("calculating [:bar] [:percent] [:eta]", output: $stdout, total: total, frequency: 10)
+
 		seeds_as_ranges.map do |seed_range| 
 			seed_range.map do |seed| 
-				ultimate_mapping(seed) 
+				ultimate_mapping(seed)
+				bar.advance
 			end
 		end.flatten
 	end
