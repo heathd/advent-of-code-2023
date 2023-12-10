@@ -68,8 +68,8 @@ class Mapper
 
 		seeds_as_ranges.map do |seed_range| 
 			seed_range.map do |seed| 
-				ultimate_mapping(seed)
 				bar.advance
+				ultimate_mapping(seed)
 			end
 		end.flatten
 	end
@@ -96,42 +96,6 @@ class MapBuilder
 	end
 end
 
-class Map
-	ATTRS = %I{from_type to_type destination_range_start source_range_start length}
-	attr_reader *ATTRS
-
-	include Comparable
-
-	def initialize(from_type, to_type, destination_range_start, source_range_start, length)
-		@from_type = from_type
-		@to_type = to_type
-		@destination_range_start = destination_range_start
-		@source_range_start = source_range_start
-		@length = length
-	end
-
-	def can_map?(from)
-		 from == @from_type
-	end
-
-	def in_range?(num)
-		num >= @source_range_start && num < @source_range_start + @length
-	end
-
-	def map(from, num)
-		if can_map?(from) && in_range?(num)
-			[@to_type, @destination_range_start + num - @source_range_start]
-		else
-			nil
-		end
-	end
-
-	def <=>(other)
-		self_data = ATTRS.map {|a| [a, self.send(a)]}
-		other_data = ATTRS.map {|a| [a, other.send(a)]}
-		self_data <=> other_data
-	end
-end
 
 class MapForType
 	ATTRS = %I{from_type to_type maps}
@@ -146,7 +110,10 @@ class MapForType
 	end
 
 	def add_mapping!(destination_range_start, source_range_start, length)
-		@maps << Map.new(from_type, to_type, destination_range_start, source_range_start, length)
+		@maps << {
+			destination_range_start: destination_range_start, 
+			source_range: source_range_start...source_range_start+length
+		}
 	end
 
 	def can_map?(from)
@@ -154,14 +121,14 @@ class MapForType
 	end
 
 	def in_range?(num)
-		@maps.any? {|m| m.in_range?(num)}
+		@maps.any? {|m| m.source_range.cover?(num)}
 	end
 
 	def map(from, num)
 		if can_map?(from)
-			map = @maps.find { |m| m.in_range?(num) }
+			map = @maps.find { |m| m[:source_range].cover?(num) }
 			if map
-				map.map(from, num)
+				[@to_type, map[:destination_range_start] + num - map[:source_range].first]
 			else
 				[@to_type, num]
 			end

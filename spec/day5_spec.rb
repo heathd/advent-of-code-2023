@@ -158,26 +158,6 @@ RSpec.describe Mapper do
 	end
 end
 
-RSpec.describe Map do
-	subject(:map) { Map.new(:seed, :soil, 50, 98, 3) }
-
-	it "maps numbers before the range to nil" do
-		expect(map.map(:seed, 97)).to eq(nil)
-	end
-
-	it "maps the number at the start of the range" do
-		expect(map.map(:seed, 98)).to eq([:soil, 50])
-	end
-
-	it "maps the number at the end of the range" do
-		expect(map.map(:seed, 100)).to eq([:soil, 52])
-	end
-
-	it "maps the number just after the end of the range to nil" do
-		expect(map.map(:seed, 101)).to eq(nil)
-	end
-end
-
 RSpec.describe MapForType do
 	subject(:map_for_type) { MapForType.new(:seed, :soil) }
 
