@@ -14,6 +14,10 @@ class Mapper
 		$1.split(" ").map(&:to_i)
 	end
 
+	def seeds_as_ranges
+		seeds.each_slice(2).map {|start, length| start...start+length}
+	end
+
 	def maps
 		@maps ||= parse_maps
 	end
@@ -54,6 +58,18 @@ class Mapper
 
 	def lowest_mapping_for_seeds
 		mappings_for_seeds.min
+	end
+
+	def mappings_for_seeds_as_ranges
+		seeds_as_ranges.map do |seed_range| 
+			seed_range.map do |seed| 
+				ultimate_mapping(seed) 
+			end
+		end.flatten
+	end
+
+	def lowest_mapping_for_seeds_as_ranges
+		mappings_for_seeds_as_ranges.min
 	end
 end
 

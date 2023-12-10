@@ -132,12 +132,28 @@ RSpec.describe Mapper do
 	end
 
 	describe "mapping for seeds" do
-		it "finds all the mappings" do
-			expect(mapper.mappings_for_seeds).to eq([82, 43, 86, 35])
+		context "treating seeds as distinct values" do
+			it "finds all the mappings" do
+				expect(mapper.mappings_for_seeds).to eq([82, 43, 86, 35])
+			end
+
+			it "finds the lowest mapping" do
+				expect(mapper.lowest_mapping_for_seeds).to eq(35)
+			end
 		end
 
-		it "finds the lowest mapping" do
-			expect(mapper.lowest_mapping_for_seeds).to eq(35)
+		context "treating the seeds as range definitions" do
+			let(:expected) {
+				[(79...79+14).to_a,(55...55+13).to_a].flatten.map {|n| mapper.ultimate_mapping(n)}
+			}
+
+			it "finds all the mappings" do
+				expect(mapper.mappings_for_seeds_as_ranges).to eq(expected)
+			end
+
+			it "finds the lowest mapping" do
+				expect(mapper.lowest_mapping_for_seeds_as_ranges).to eq(expected.min)
+			end
 		end
 	end
 end
