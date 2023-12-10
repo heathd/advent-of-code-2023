@@ -1,3 +1,5 @@
+require 'strscan'
+
 class Mapper
 	attr_reader :map_data, :map_builder
 
@@ -153,3 +155,7 @@ class MapForType
 	end
 end
 
+
+if __FILE__==$0
+	puts Mapper.new(ARGF.read).lowest_mapping_for_seeds
+end
