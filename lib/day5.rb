@@ -105,18 +105,13 @@ class Mapper
 	def mappings_for_seeds_as_ranges
 		total = seeds_as_ranges.map {|r| r.size}.inject(&:+)
 
-		bar = TTY::ProgressBar.new("calculating [:bar] [:percent] [:eta]", output: $stdout, total: total, frequency: 10)
-
-		seeds_as_ranges.map do |seed_range| 
-			seed_range.map do |seed| 
-				bar.advance
-				ultimate_mapping(seed)
-			end
-		end.flatten
+		path = mapping_path(:seed, seeds_as_ranges)
+		type, *ranges = path.last
+		ranges
 	end
 
 	def lowest_mapping_for_seeds_as_ranges
-		mappings_for_seeds_as_ranges.min
+		mappings_for_seeds_as_ranges.map(&:first).min
 	end
 end
 

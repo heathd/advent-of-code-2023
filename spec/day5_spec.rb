@@ -204,7 +204,8 @@ RSpec.describe Mapper do
 			}
 
 			it "finds all the mappings" do
-				expect(mapper.mappings_for_seeds_as_ranges).to eq(expected)
+				expect(mapper.mappings_for_seeds_as_ranges).to all(be_a(Range))
+				expect(mapper.mappings_for_seeds_as_ranges.map(&:to_a).flatten).to eq(expected)
 			end
 
 			it "finds the lowest mapping" do
