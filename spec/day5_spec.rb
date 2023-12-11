@@ -178,28 +178,6 @@ RSpec.describe MapForType do
 			map_for_type.add_mapping!(198, 98, 3)
 		}
 
-		xdescribe "mapping single values" do
-			it "maps numbers before the range to the same number in the destination range" do
-				expect(map_for_type.map(:seed, 97)).to eq([:soil, 97])
-			end
-
-			it "maps the number at the start of the range" do
-				expect(map_for_type.map(:seed, 98)).to eq([:soil, 198])
-			end
-
-			it "maps the number at the end of the range" do
-				expect(map_for_type.map(:seed, 100)).to eq([:soil, 200])
-			end
-
-			it "maps the number just after the end of the range to the same number in the destination range" do
-				expect(map_for_type.map(:seed, 101)).to eq([:soil, 101])
-			end
-
-			it "returns nil for a type not mapped" do
-				expect(map_for_type.map(:land, 101)).to eq(nil)
-			end
-		end
-
 		describe "mapping using ranges" do
 			context "a single source range" do
 				it "maps a range entirely covered" do
