@@ -1,13 +1,16 @@
 require 'day7/hand'
 
 class CamelCards
-  def initialize
+  attr_reader :hands, :joker_rule
+  
+  def initialize(joker_rule: false)
     @hands = []
+    @joker_rule = joker_rule
   end
 
   def add_hand(hand, bid)
     @hands << {
-      hand: Hand.new(hand),
+      hand: Hand.new(hand, joker_rule: joker_rule),
       bid: bid
     }
   end

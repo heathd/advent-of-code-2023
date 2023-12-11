@@ -1,8 +1,10 @@
 class Hand
-  attr_reader :hand
+  attr_reader :hand, :joker_rule
 
-  def initialize(hand)
+  def initialize(hand, joker_rule: false)
     @hand = hand
+    @joker_rule = joker_rule
+
     validate_hand!
   end
 
@@ -11,7 +13,25 @@ class Hand
   end
 
   def counts
-    cards.group_by {|c| c}.map {|c, l| [c, l.size]}.sort_by {|card, count| -count}
+    counts = cards.group_by {|c| c}.map {|c, l| [c, l.size]}.sort_by {|card, count| -count}
+    if joker_rule
+      _, num_jokers = counts.find { |card, count| card == "J"} || ["", 0]
+
+      rest = counts.reject {|card, count| card == "J"}
+
+      if rest.empty?
+        [["J", num_jokers]]
+      else
+        _, frequency_of_next_most_common_card = rest.first
+
+        choices_to_match_joker_with = rest.select {|c,count| count == frequency_of_next_most_common_card}
+        most_common_card, most_common_card_count = choices_to_match_joker_with.sort_by {|c, _| CARDS.find_index(c)}.first
+
+        [[most_common_card, most_common_card_count+num_jokers]] + rest.reject {|c, _| c == most_common_card}
+      end
+    else
+      counts
+    end
   end
 
   def type
@@ -63,9 +83,11 @@ class Hand
   end
 
   CARDS = %w{A K Q J T 9 8 7 6 5 4 3 2}
+  CARDS_FOR_JOKER_RULE = %w{A K Q T 9 8 7 6 5 4 3 2 J}
 
   def card_strength
-    cards.map {|card| CARDS.find_index(card) + 1}
+    mapping = joker_rule ? CARDS_FOR_JOKER_RULE : CARDS
+    cards.map {|card| mapping.find_index(card) + 1}
   end
 
   def validate_hand!

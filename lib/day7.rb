@@ -1,7 +1,7 @@
 $LOAD_PATH << File.dirname(__FILE__) + "/."
 require 'day7/camel_cards'
 
-game = CamelCards.new
+game = CamelCards.new(joker_rule: ARGV.any? {|a| a=="--joker-rule"})
 
 %w{
 94J8A 16

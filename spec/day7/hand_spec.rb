@@ -16,6 +16,39 @@ RSpec.describe Hand do
       expect(Hand.new("AAAA2").counts).to eq([["A", 4], ["2", 1]])
       expect(Hand.new("AAAT2").counts).to eq([["A", 3], ["T", 1], ["2", 1]])
     end
+
+    context "with joker rule" do
+      it "counts jokers along with the card that will give five of a kind" do
+        expect(Hand.new("AAAAA", joker_rule: true).counts).to eq([["A", 5]])
+        expect(Hand.new("AAAAJ", joker_rule: true).counts).to eq([["A", 5]])
+        expect(Hand.new("AAAJJ", joker_rule: true).counts).to eq([["A", 5]])
+        expect(Hand.new("AAJJJ", joker_rule: true).counts).to eq([["A", 5]])
+        expect(Hand.new("AJJJJ", joker_rule: true).counts).to eq([["A", 5]])
+        expect(Hand.new("JJJJJ", joker_rule: true).counts).to eq([["J", 5]])
+      end
+
+      it "counts jokers along with the card that will give the strongest four of a kind" do
+        expect(Hand.new("3AAAA", joker_rule: true).counts).to eq([["A", 4], ["3", 1]])
+        expect(Hand.new("3AAAJ", joker_rule: true).counts).to eq([["A", 4], ["3", 1]])
+        expect(Hand.new("3AAJJ", joker_rule: true).counts).to eq([["A", 4], ["3", 1]])
+        expect(Hand.new("3AJJJ", joker_rule: true).counts).to eq([["A", 4], ["3", 1]])
+      end
+
+      it "counts jokers along with the card that will give the strongest three of a kind" do
+        expect(Hand.new("32AAA", joker_rule: true).counts).to eq([["A", 3], ["3", 1], ["2", 1]])
+        expect(Hand.new("32AAJ", joker_rule: true).counts).to eq([["A", 3], ["3", 1], ["2", 1]])
+        expect(Hand.new("32AJJ", joker_rule: true).counts).to eq([["A", 3], ["3", 1], ["2", 1]])
+      end
+
+      it "counts jokers along with the cards that will create a full house" do
+        expect(Hand.new("3322J", joker_rule: true).counts).to eq([["3", 3], ["2", 2]])
+        expect(Hand.new("J3223", joker_rule: true).counts).to eq([["3", 3], ["2", 2]])
+      end
+
+      it "counts jokers along with the cards that will create a pair" do
+        expect(Hand.new("3456J", joker_rule: true).counts).to eq([["6", 2], ["3", 1], ["4", 1], ["5", 1]])
+      end
+    end
   end
 
   describe "identifying type of hand" do
@@ -93,6 +126,12 @@ RSpec.describe Hand do
       expect(Hand.new("A22A4").card_strength).to eq([1, 13, 13, 1, 11])
       expect(Hand.new("4A23A").card_strength).to eq([11, 1, 13, 12, 1])
       expect(Hand.new("A5234").card_strength).to eq([1, 10, 13, 12, 11])
+    end
+
+    context "joker rule" do
+      it "treats joker as the weakest card" do
+        expect(Hand.new("AAAAJ", joker_rule: true).card_strength).to eq([1, 1, 1, 1, 13])
+      end
     end
   end
 
