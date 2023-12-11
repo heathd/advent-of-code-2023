@@ -30,27 +30,46 @@ class Mapper
 
 	def map(from, num)
 		maps.each do |m| 
-			dest = m.map(from, num)
+			dest = m.map_range(from, num...num+1)
+			if dest != nil
+				dest_type, dest_num = dest
+				return [dest_type, dest_num.first]
+			end
+		end
+
+		nil
+	end
+
+	def map_range(from, range)
+		maps.each do |m| 
+			dest = m.map_range(from, range)
 			return dest if dest != nil
 		end
 
 		nil
 	end
 
-	def mapping_path(seed)
+	def mapping_path(seed_ranges)
 		type = :seed
-		num = seed
 
-		path = [[type, num]]
-		while mapped = map(type, num)
-			path << mapped
-			type,num = mapped
+		path = [[type, seed_ranges]]
+		dest_range = []
+		dest_type = nil
+		begin
+			seed_ranges.map do |seed_range|
+				mapped = map_range(type, seed_range)
+				dest_type ||= mapped.first
+				dest_range += mapped[1..-1]
+			end
 		end
-		path
 	end
 
 	def ultimate_mapping(seed)
-		mapping_path(seed).last.last
+		mapping_path([seed...seed+1]).last.last
+	end
+
+	def ultimate_mapping_for_range(seed_range)
+		mapping_path([seed_range]).last.last
 	end
 
 	def mappings_for_seeds
@@ -114,26 +133,93 @@ class MapForType
 			destination_range_start: destination_range_start, 
 			source_range: source_range_start...source_range_start+length
 		}
+		@maps.sort_by! {|m| m[:source_range].first}
 	end
 
 	def can_map?(from)
 		 from == @from_type
 	end
 
-	def in_range?(num)
-		@maps.any? {|m| m.source_range.cover?(num)}
-	end
-
-	def map(from, num)
+	def xmap(from, num)
 		if can_map?(from)
 			map = @maps.find { |m| m[:source_range].cover?(num) }
 			if map
-				[@to_type, map[:destination_range_start] + num - map[:source_range].first]
+				[@to_type, map_num(map, num)]
 			else
 				[@to_type, num]
 			end
 		else
 			nil
+		end
+	end
+
+	def map_num(map, num)
+		map[:destination_range_start] + num - map[:source_range].first
+	end
+
+	def earliest_source_range_start
+		@maps.first[:source_range].first
+	end
+
+	def split_on_range_boundaries(range)
+		ranges = []
+
+		current_range_start = range.first
+		map_iterator = @maps.each
+
+		while current_range_start
+			begin
+				map = map_iterator.next
+
+				if current_range_start < map[:source_range].first
+					if range.last > map[:source_range].last
+						ranges << Range.new(current_range_start, map[:source_range].first, true)
+						ranges << Range.new(map[:source_range].first, map[:source_range].last, true)
+						current_range_start = map[:source_range].last
+					elsif range.last > map[:source_range].first
+						ranges << Range.new(current_range_start, map[:source_range].first, true)
+						ranges << Range.new(map[:source_range].first, range.last, true)
+						current_range_start = nil
+					else
+						ranges << Range.new(current_range_start, range.last, true)
+						current_range_start = nil
+					end
+				elsif current_range_start < map[:source_range].last
+					if range.last <= map[:source_range].last
+						ranges << Range.new(current_range_start, range.last, true)
+						current_range_start = nil
+					else
+						ranges << Range.new(current_range_start, map[:source_range].last, true)
+						current_range_start = map[:source_range].last
+					end
+				end
+			rescue StopIteration
+				ranges << Range.new(current_range_start, range.last, true)
+				current_range_start = nil
+			end
+		end
+		ranges
+	end
+
+	def map_range(from, range)
+		return nil unless can_map?(from)
+		source_ranges = split_on_range_boundaries(range)
+
+		[@to_type] + source_ranges.map {|s| map_source_contiguous_range(s)}
+	end
+
+	def map_source_contiguous_range(source_range)
+		map = @maps.find { |m| m[:source_range].cover?(source_range) }
+		if map
+			dest_start = map_num(map, source_range.first)
+			if source_range.exclude_end?
+				dest_range = dest_start...map_num(map, source_range.last - 1) + 1
+			else
+				raise "Can only process ranges which exclude end"
+			end
+			dest_range
+		else
+			source_range
 		end
 	end
 

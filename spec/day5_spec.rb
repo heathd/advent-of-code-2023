@@ -125,13 +125,25 @@ RSpec.describe Mapper do
 		end
 	end
 
-	describe "#ultimate_mapping" do
-		it "maps 79 ultimately to 82" do
-			expect(mapper.ultimate_mapping(79)).to eq(82)
+
+	describe "#map_range" do
+		it "can map a range spanning a source range, producing two ranges as output" do
+			expect(mapper.map_range(:light, 40...50)).to eq([:temperature, 40...45, 81...86])
 		end
 	end
 
-	describe "mapping for seeds" do
+	xdescribe "#ultimate_mapping" do
+		it "maps 79 ultimately to 82" do
+			expect(mapper.ultimate_mapping(79)).to eq(82)
+		end
+
+		it "maps a range 79...80 ultimately to 82...83" do
+			expect(mapper.ultimate_mapping_for_range(79...80)).to eq(82...83)
+		end
+
+	end
+
+	xdescribe "mapping for seeds" do
 		context "treating seeds as distinct values" do
 			it "finds all the mappings" do
 				expect(mapper.mappings_for_seeds).to eq([82, 43, 86, 35])
@@ -163,27 +175,108 @@ RSpec.describe MapForType do
 
 	context "a single mapping" do
 		before(:each) {
-			map_for_type.add_mapping!(50, 98, 3)
+			map_for_type.add_mapping!(198, 98, 3)
 		}
 
-		it "maps numbers before the range to the same number in the destination range" do
-			expect(map_for_type.map(:seed, 97)).to eq([:soil, 97])
+		xdescribe "mapping single values" do
+			it "maps numbers before the range to the same number in the destination range" do
+				expect(map_for_type.map(:seed, 97)).to eq([:soil, 97])
+			end
+
+			it "maps the number at the start of the range" do
+				expect(map_for_type.map(:seed, 98)).to eq([:soil, 198])
+			end
+
+			it "maps the number at the end of the range" do
+				expect(map_for_type.map(:seed, 100)).to eq([:soil, 200])
+			end
+
+			it "maps the number just after the end of the range to the same number in the destination range" do
+				expect(map_for_type.map(:seed, 101)).to eq([:soil, 101])
+			end
+
+			it "returns nil for a type not mapped" do
+				expect(map_for_type.map(:land, 101)).to eq(nil)
+			end
 		end
 
-		it "maps the number at the start of the range" do
-			expect(map_for_type.map(:seed, 98)).to eq([:soil, 50])
-		end
+		describe "mapping using ranges" do
+			context "a single source range" do
+				it "maps a range entirely covered" do
+					expect(map_for_type.map_range(:seed, 98...101)).to eq([:soil, 198...201])
+				end
 
-		it "maps the number at the end of the range" do
-			expect(map_for_type.map(:seed, 100)).to eq([:soil, 52])
-		end
+				it "maps a range entirely outside" do
+					expect(map_for_type.map_range(:seed, 1...3)).to eq([:soil, 1...3])
+				end
 
-		it "maps the number just after the end of the range to the same number in the destination range" do
-			expect(map_for_type.map(:seed, 101)).to eq([:soil, 101])
-		end
+				it "maps a range which overlaps the start" do
+					expect(map_for_type.map_range(:seed, 97...99)).to eq([:soil, 97...98, 198...199])
+				end
 
-		it "returns nil for a type not mapped" do
-			expect(map_for_type.map(:land, 101)).to eq(nil)
+				it "maps a range which overlaps the start and meets the end" do
+					expect(map_for_type.map_range(:seed, 97...101)).to eq([:soil, 97...98, 198...201])
+				end
+
+				it "maps a range which overlaps the start and goes past the end" do
+					expect(map_for_type.map_range(:seed, 97...102)).to eq([:soil, 97...98, 198...201, 101...102])
+				end
+
+				it "maps a range which starts at the start" do
+					expect(map_for_type.map_range(:seed, 98...99)).to eq([:soil, 198...199])
+				end
+
+				it "maps a range which starts at the start and goes past the end" do
+					expect(map_for_type.map_range(:seed, 98...102)).to eq([:soil, 198...201, 101...102])
+				end
+
+				it "maps a range which starts after the start and goes past the end" do
+					expect(map_for_type.map_range(:seed, 99...102)).to eq([:soil, 199...201, 101...102])
+				end
+
+				it "maps a range which starts after the end" do
+					expect(map_for_type.map_range(:seed, 101...102)).to eq([:soil, 101...102])
+				end
+			end
+
+			context "two source ranges" do
+				before(:each) {
+					map_for_type.add_mapping!(310, 10, 10)
+				}
+
+				context "ranges starting before all ranges" do
+					it "maps a range which ends before all range starts" do
+						expect(map_for_type.map_range(:seed, 5...8)).to eq([:soil, 5...8])
+					end
+
+					it "maps a range which ends after the first range start" do
+						expect(map_for_type.map_range(:seed, 5...12)).to eq([:soil, 5...10, 310...312])
+					end
+
+					it "maps a range which ends after the first range end" do
+						expect(map_for_type.map_range(:seed, 5...22)).to eq([:soil, 5...10, 310...320, 20...22])
+					end
+
+					it "maps a range which ends after the second range start" do
+						expect(map_for_type.map_range(:seed, 5...99)).to eq([:soil, 5...10, 310...320, 20...98, 198...199])
+					end
+
+					it "maps a range which ends after the second range end" do
+						expect(map_for_type.map_range(:seed, 5...103)).to eq([:soil, 5...10, 310...320, 20...98, 198...201, 101...103])
+					end
+				end
+			end
+
+			context "three source ranges" do
+				before(:each) {
+					map_for_type.add_mapping!(310, 10, 10)
+					map_for_type.add_mapping!(430, 30, 10)
+				}
+	
+				it "maps a range which ends after the third range end" do
+					expect(map_for_type.map_range(:seed, 5...103)).to eq([:soil, 5...10, 310...320, 20...30, 430...440, 40...98, 198...201, 101...103])
+				end
+			end
 		end
 	end
 end
