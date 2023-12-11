@@ -125,25 +125,69 @@ RSpec.describe Mapper do
 		end
 	end
 
-
 	describe "#map_range" do
 		it "can map a range spanning a source range, producing two ranges as output" do
 			expect(mapper.map_range(:light, 40...50)).to eq([:temperature, 40...45, 81...86])
 		end
 	end
 
-	xdescribe "#ultimate_mapping" do
+	describe "#mapping_path" do
+		it "calculate the mapping path using ranges" do
+			expect(mapper.mapping_path(:seed, [79...80])).to eq([
+				[:seed, 79...80],
+				[:soil, 81...82],
+				[:fertilizer, 81...82],
+				[:water, 81...82],
+				[:light, 74...75],
+				[:temperature, 78...79],
+				[:humidity, 78...79],
+				[:location, 82...83]
+			])
+		end
+
+		it "calculate the mapping path using ranges" do
+			expect(mapper.mapping_path(:fertilizer, [81...82])).to eq([
+				[:fertilizer, 81...82],
+				[:water, 81...82],
+				[:light, 74...75],
+				[:temperature, 78...79],
+				[:humidity, 78...79],
+				[:location, 82...83]
+			])
+		end
+
+		it "calculate the mapping path using ranges" do
+			expect(mapper.mapping_path(:humidity, [78...79])).to eq([
+				[:humidity, 78...79],
+				[:location, 82...83]
+			])
+		end
+
+		it "calculate the mapping path using ranges spanning input range boundaries" do
+			# humidity-to-location map:
+			# 60 56 37
+			# 56 93 4
+			expect(mapper.mapping_path(:humidity, [50...94])).to eq([
+				[:humidity, 50...94],
+				[:location, 50...56, 60...97, 56...57]
+			])
+		end
+
+	end
+
+
+	describe "#ultimate_mapping" do
 		it "maps 79 ultimately to 82" do
 			expect(mapper.ultimate_mapping(79)).to eq(82)
 		end
 
 		it "maps a range 79...80 ultimately to 82...83" do
-			expect(mapper.ultimate_mapping_for_range(79...80)).to eq(82...83)
+			expect(mapper.ultimate_mapping_for_range(79...80)).to eq([82...83])
 		end
 
 	end
 
-	xdescribe "mapping for seeds" do
+	describe "mapping for seeds" do
 		context "treating seeds as distinct values" do
 			it "finds all the mappings" do
 				expect(mapper.mappings_for_seeds).to eq([82, 43, 86, 35])

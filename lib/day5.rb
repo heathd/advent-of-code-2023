@@ -28,48 +28,70 @@ class Mapper
 		maps.map {|m| map_builder.parse(m.strip + "\n") }.flatten
 	end
 
-	def map(from, num)
-		maps.each do |m| 
-			dest = m.map_range(from, num...num+1)
-			if dest != nil
-				dest_type, dest_num = dest
-				return [dest_type, dest_num.first]
-			end
-		end
+	def mapper_for(type)
+		maps.find {|m| m.can_map?(type)}
+	end
 
-		nil
+	def can_map?(type)
+		!mapper_for(type).nil?
+	end
+
+	def map(from, num_or_range)
+		if num_or_range.is_a?(Range)
+			map_range(from, num_or_range)
+		else
+			dest = map_range(from, num_or_range...num_or_range+1)
+			dest && [dest.first, dest.last.first]
+		end
 	end
 
 	def map_range(from, range)
-		maps.each do |m| 
-			dest = m.map_range(from, range)
-			return dest if dest != nil
+		if can_map?(from)
+			mapper_for(from).map_range(from, range)
 		end
-
-		nil
 	end
 
-	def mapping_path(seed_ranges)
-		type = :seed
-
-		path = [[type, seed_ranges]]
+	def mapping_path(type, seed_ranges)
+		path = []
 		dest_range = []
 		dest_type = nil
-		begin
+		mapped = true
+		i = 0
+
+		while mapped && i<20
+			i+=1
+
+			path << [type, *seed_ranges]
 			seed_ranges.map do |seed_range|
 				mapped = map_range(type, seed_range)
-				dest_type ||= mapped.first
-				dest_range += mapped[1..-1]
+				if mapped
+					dest_type ||= mapped.first
+					dest_range += mapped[1..-1]
+				end
 			end
-		end
+
+			if dest_type
+				type = dest_type
+				seed_ranges = dest_range
+				dest_type = nil
+				dest_range = []
+				mapped = true
+			end
+		end 
+
+		path
 	end
 
 	def ultimate_mapping(seed)
-		mapping_path([seed...seed+1]).last.last
+		path = mapping_path(:seed, [seed...seed+1])
+		type, *ranges = path.last
+		ranges.last.first
 	end
 
 	def ultimate_mapping_for_range(seed_range)
-		mapping_path([seed_range]).last.last
+		path = mapping_path(:seed, [seed_range])
+		type, *ranges = path.last
+		ranges
 	end
 
 	def mappings_for_seeds
@@ -138,19 +160,6 @@ class MapForType
 
 	def can_map?(from)
 		 from == @from_type
-	end
-
-	def xmap(from, num)
-		if can_map?(from)
-			map = @maps.find { |m| m[:source_range].cover?(num) }
-			if map
-				[@to_type, map_num(map, num)]
-			else
-				[@to_type, num]
-			end
-		else
-			nil
-		end
 	end
 
 	def map_num(map, num)
