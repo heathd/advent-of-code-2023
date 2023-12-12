@@ -29,11 +29,23 @@ class SequenceAnalyzer
     end
   end
 
+  def extrapolate_backwards
+    ([sequence] + differentials).reverse.inject(0) do |memo, differential|
+      differential.first - memo
+    end
+  end
+
   def self.from_file(data)
-    data.split("\n").map {|line| SequenceAnalyzer.new(line.split(" ").map(&:to_i))}
+    lines = data.split("\n").map(&:strip).reject(&:empty?)
+
+    lines.map {|line| SequenceAnalyzer.new(line.split(" ").map(&:to_i))}
   end
 end
 
 if __FILE__==$0
-  puts SequenceAnalyzer.from_file(ARGF.read).map(&:extrapolate).inject(&:+)
+  if ARGV[0] == "-b"
+    puts SequenceAnalyzer.from_file($stdin.read).map(&:extrapolate_backwards).inject(&:+)
+  else
+    puts SequenceAnalyzer.from_file($stdin.read).map(&:extrapolate).inject(&:+)
+  end
 end
